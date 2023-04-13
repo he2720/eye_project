@@ -1,28 +1,63 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
+  data() {
+    return {
+      flag: 1,
+      gap_time: 0,
+      beforeUnload_time: 0,
+
+      showRouter: true
+    };
+  },
+  methods: {
+    beforeunloadHandler(e) {
+      this._beforeUnload_time = new Date().getTime()
+      e = e || window.event
+      if (e) {
+        e.returnValue = '关闭提示'
+      }
+      return '关闭提示'
+    },
+
+    logout() {
+      this.flag = 0;
+      const data = window.sessionStorage.getItem("username");
+      window.sessionStorage.clear();
+      this.$axios({
+        method: "POST",
+        url: "/api/logout/",
+        data: data,
+      }).then((response) => {
+        console.log(response.data);
+      });
+      this.$router.push("/login");
+    },
+    reload (){
+      this.showRouter = false
+      this.$nextTick(()=>{
+        this.showRouter = true
+      })
+    }
+  },
+
+
+
+  mounted() {
+    // 监听浏览器关闭
+    window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
+  },
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>
